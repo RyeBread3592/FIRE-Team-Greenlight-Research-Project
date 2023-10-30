@@ -25,7 +25,7 @@ If you have loops, do not run the entire thing. Instead, run one sample loop or 
 
 You can also suppress warnings by adding **#\| warning: false**.
 
-```{r}
+```{r, test}
 #| eval: false
 #| warning: false
 
