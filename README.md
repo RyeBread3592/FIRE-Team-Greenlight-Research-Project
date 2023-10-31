@@ -103,11 +103,17 @@ write.csv(d, "G:/Shared drives/2023 FIRE-SA/FALL OUTPUT/Team Greenlight/OUTPUT/2
 ```
 
 <img src="Light%20Rail%20Area%20of%20Influence.png"
-data-fig-align="center"
-alt="A map of the LYNX Blue Line and the 10km radius around it" />
+data-fig-align="center" />
 
-![A visualization of the NDVI data for the day January 1st,
-2000.](01-01-2000%20NDVI.png)
+This is a map of the LYNX Blue Line and the 10km circle region that we
+are interested in.
+
+![](01-01-2000%20NDVI.png)
+
+This is a plot of the NDVI Index on January 1st, 2000. NDVI, or
+Normalized Difference Vegetation Index, is a metric used to measure the
+health and density of plant life and other greenery, where the higher
+the number is, the better the vegetation.
 
 ## Preliminary Results
 
