@@ -3,29 +3,41 @@ Nayab Safdar, Okan Ulug-Berter, Rygel Yance, Kenny Zhu
 
 ## Research Question
 
-Write research question here.
-
 How did the opening of the LYNX Blue Line Light Rail in Charlotte, NC
 impact the level of pm 2.5 air pollution in a 10km radius around it?
-
-(Optional) Insert an image if it helps motivate the research question.
 
 ## Data Wrangling
 
 **Outcome variable**
 
-Write description, data source, and wrangling methodology. Show a map if
-you have made one.
-
 Our outcome variable was the level of PM2.5 air pollution in a 10km
 region surrounding the center of the LYNX Blue Line. The data for this
 was gathered and wrangled by our stream’s PRMs.
 
-If you have loops, do not run the entire thing. Instead, run one sample
-loop or just display your codes without making it run by adding **\#\|
-eval: false** at the top of the chunk.
+**Treatment variable**
 
-You can also suppress warnings by adding **\#\| warning: false**.
+The treatment variable is whether or not the light rail was opened,
+which is just a binary open or not open. The LYNX Blue Line opened in
+December of 2007 and has been in operation since. For the wrangling
+methodology, this variable was added as an additional column in our
+final dataset where 0 would represent the line being closed and 1 would
+be the line being open.
+
+<img src="LYNX%20Blue%20Line.png" data-fig-align="center"
+alt="Plot of the LYNX Blue Line" />
+
+**Control variables**
+
+Our control variable is the Normalized Difference Vegetation Index in
+Charlotte in a 10km radius around the center of the light rail. This
+data was sourced from NASA EarthData. For data wrangling, the data we
+gathered had to be extracted and organized by both the month that each
+of the 46 layers had been taken in (see previous code), then limit the
+data to only include the 10km region around the LYNX Blue Line. This was
+repeated for each of the years between 2000 and 2015. The NDVI data was
+then averaged out for each month and combined with the pollution data to
+provide a control variable. Example code for extracting the NDVI data
+for the year 2000 is show below:
 
 ``` r
 #Sample loop of extracting the NDVI data for the year 2000
@@ -90,44 +102,17 @@ d<-cbind(output,month)
 write.csv(d, "G:/Shared drives/2023 FIRE-SA/FALL OUTPUT/Team Greenlight/OUTPUT/2000_PollutionData.csv")
 ```
 
-**Treatment variable**
-
-Write description, data source, and wrangling methodology. Show a map if
-you have one.
-
-The treatment variable is whether or not the light rail was opened,
-which is just a binary open or not open. The LYNX Blue Line opened in
-December of 2007 and has been in operation since. For the wrangling
-methodology, this variable was added as an additional column in our
-final dataset where 0 would represent the line being closed and 1 would
-be the line being open.
-
-<img src="LYNX%20Blue%20Line.png" data-fig-align="center"
-alt="Plot of the LYNX Blue Line" />
-
-**Control variables**
-
-Write description, data source, and wrangling methodology. Show a map if
-you have one.
-
-Our control variable is the Normalized Difference Vegetation Index in
-Charlotte in a 10km radius around the center of the light rail. This
-data was sourced from NASA EarthData. For data wrangling, the data we
-gathered had to be extracted and organized by both the month that each
-of the 46 layers had been taken in (see previous code), then limit the
-data to only include the 10km region around the LYNX Blue Line. This was
-repeated for each of the years between 2000 and 2015. The NDVI data was
-then averaged out for each month and combined with the pollution data to
-provide a control variable.
-
 <img src="Light%20Rail%20Area%20of%20Influence.png"
 data-fig-align="center"
 alt="A map of the LYNX Blue Line and the 10km radius around it" />
 
+![A visualization of the NDVI data for the day January 1st,
+2000.](01-01-2000%20NDVI.png)
+
 ## Preliminary Results
 
-Display a figure showing how the treatment variable impacted the outcome
-variable.
+Below is some code to generate some preliminary results for the NDVI
+data alongside the PM2.5 Pollution data.
 
 ``` r
 library("tidyverse")
@@ -188,3 +173,12 @@ ggplot(data = Full_data_avg, aes(x = date, y = avg_pm25, color = avg_pm25)) + ge
       variable into a factor?
 
 ![](README_files/figure-commonmark/unnamed-chunk-1-2.png)
+
+The vertical line in each graph represents the date that the LYNX Blue
+Line opened, December of 2007. As seen in the NDVI graph, the NDVI was
+seemingly unaffected by the opening of the lightrail. However, with the
+pollution data, it shows a downwards trend in PM2.5 pollution, and since
+the NDVI index shows little change over time, this may indicate that the
+lightrail opening had some positive impact on air pollution. However,
+this downward trend was also observed before the opening, so it’s
+probably not the only factor.
