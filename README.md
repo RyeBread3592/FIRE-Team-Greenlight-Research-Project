@@ -23,8 +23,10 @@ methodology, this variable was added as an additional column in our
 final dataset where 0 would represent the line being closed and 1 would
 be the line being open.
 
-<img src="LYNX%20Blue%20Line.png" data-fig-align="center"
-alt="Plot of the LYNX Blue Line" />
+![](Light_rail_with_border.png)
+
+This is an image of the Lynx Blue line within the border of Charlotte,
+NC
 
 **Control variables**
 
@@ -188,3 +190,120 @@ the NDVI index shows little change over time, this may indicate that the
 lightrail opening had some positive impact on air pollution. However,
 this downward trend was also observed before the opening, so it’s
 probably not the only factor.
+
+## Preliminary Regression Results
+
+Below is code for some preliminary regression analysis using the cities
+of Asheville, Cincinnati, Columbia, and Greensboro as control cities, as
+they had similar trends of PM2.5 air pollution as Charlotte prior to the
+opening of the Lynx Blue Line. This final dataframe was created in a
+similar way to the original for Charlotte, gathering the PM2.5 data over
+the same intervals and adding other data such as weather information and
+creating a categorical variable to represent each city. All of this data
+was collected and put together by our stream’s PRMs to create the final
+dataframe we used.
+
+``` r
+# Regression Analysis
+Controls_data<-read.csv("charlotte_controls.csv")
+
+Controls_data2<-Controls_data %>%
+  mutate(Charlotte=ifelse(Name == "Charlotte", 1, 0)) %>%
+  mutate(Open=ifelse(year>=2008,1,0))
+
+summary(c1<-lm(pm25 ~ Charlotte + Open + Charlotte:Open, data = Controls_data2))
+```
+
+
+    Call:
+    lm(formula = pm25 ~ Charlotte + Open + Charlotte:Open, data = Controls_data2)
+
+    Residuals:
+       Min     1Q Median     3Q    Max 
+    -7.569 -2.021 -0.480  1.737 10.870 
+
+    Coefficients:
+                   Estimate Std. Error t value Pr(>|t|)    
+    (Intercept)     14.3016     0.1523  93.896   <2e-16 ***
+    Charlotte        0.4119     0.3406   1.209    0.227    
+    Open            -4.3208     0.2093 -20.641   <2e-16 ***
+    Charlotte:Open  -0.3431     0.4681  -0.733    0.464    
+    ---
+    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+    Residual standard error: 2.985 on 1016 degrees of freedom
+    Multiple R-squared:  0.3517,    Adjusted R-squared:  0.3498 
+    F-statistic: 183.7 on 3 and 1016 DF,  p-value: < 2.2e-16
+
+``` r
+# 2nd Regression with city controls, weather controls, and nonlinear weather controls
+install.packages("lfe")
+```
+
+    Installing package into '/cloud/lib/x86_64-pc-linux-gnu-library/4.3'
+    (as 'lib' is unspecified)
+
+``` r
+library("lfe")
+```
+
+    Loading required package: Matrix
+
+
+    Attaching package: 'Matrix'
+
+    The following objects are masked from 'package:tidyr':
+
+        expand, pack, unpack
+
+``` r
+Controls_data3<- Controls_data2 %>%
+  mutate(Weather = AWND*PRCP*TAVG)
+
+CategoricalModel<- felm(pm25 ~ AWND + TAVG + PRCP + Charlotte + Open + Charlotte:Open + city_num + Weather, data = Controls_data3)
+
+summary(CategoricalModel)
+```
+
+
+    Call:
+       felm(formula = pm25 ~ AWND + TAVG + PRCP + Charlotte + Open +      Charlotte:Open + city_num + Weather, data = Controls_data3) 
+
+    Residuals:
+        Min      1Q  Median      3Q     Max 
+    -6.9623 -1.6496 -0.2551  1.5522  9.2238 
+
+    Coefficients:
+                     Estimate Std. Error t value Pr(>|t|)    
+    (Intercept)     1.618e+01  5.650e-01  28.632  < 2e-16 ***
+    AWND           -4.713e-01  1.137e-01  -4.144  3.7e-05 ***
+    TAVG            1.949e-01  1.414e-02  13.777  < 2e-16 ***
+    PRCP           -5.114e-03  2.583e-03  -1.980   0.0480 *  
+    Charlotte       3.528e+00  3.921e-01   8.996  < 2e-16 ***
+    Open           -4.251e+00  1.727e-01 -24.613  < 2e-16 ***
+    city_num       -1.220e+00  9.935e-02 -12.283  < 2e-16 ***
+    Weather        -1.007e-04  5.409e-05  -1.862   0.0629 .  
+    Charlotte:Open -3.051e-01  3.846e-01  -0.793   0.4278    
+    ---
+    Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+    Residual standard error: 2.451 on 1011 degrees of freedom
+    Multiple R-squared(full model): 0.5648   Adjusted R-squared: 0.5614 
+    Multiple R-squared(proj model): 0.5648   Adjusted R-squared: 0.5614 
+    F-statistic(full model):  164 on 8 and 1011 DF, p-value: < 2.2e-16 
+    F-statistic(proj model):   164 on 8 and 1011 DF, p-value: < 2.2e-16 
+
+The results from our preliminary dataframe are further supported through
+the regression results. The first regression, which only uses the light
+rail open and Charlotte variables, only gives a coefficient of -0.34 for
+the Charlotte:Open variable, which is what we’re interested in. This is
+not significantly different from 0, so this regression shows that
+there’s very little or no correlation between the light rail opening and
+the level of PM2.5 pollution. Adding in our control cities, weather
+controls, and non-linear weather controls to our regression, the
+coefficient for Charlotte:Open goes down to -0.31, which is even lower
+and again seems to support the idea that the opening of the Lynx Blue
+Line has little to no correlation with the level of PM2.5 air pollution
+in the immediate area. From the first graph through, it’s clear that
+there’s been a downward trend in PM2.5 air pollution over the years, so
+there’s likely other factors that could be causing this.
