@@ -19,7 +19,9 @@ Our outcome variable was the level of PM2.5 air pollution in a 10km region surro
 
 The treatment variable is whether or not the light rail was opened, which is just a binary open or not open. The LYNX Blue Line opened in December of 2007 and has been in operation since. For the wrangling methodology, this variable was added as an additional column in our final dataset where 0 would represent the line being closed and 1 would be the line being open.
 
-![Plot of the LYNX Blue Line](LYNX%20Blue%20Line.png){fig-align="center"}
+![](Light_rail_with_border.png)
+
+This is an image of the Lynx Blue line within the border of Charlotte, NC
 
 **Control variables**
 
@@ -96,7 +98,7 @@ write.csv(d, "G:/Shared drives/2023 FIRE-SA/FALL OUTPUT/Team Greenlight/OUTPUT/2
 
 This is a map of the LYNX Blue Line and the 10km circle region that we are interested in.
 
-![](01-01-2000 NDVI.png)
+![](01-01-2000%20NDVI.png)
 
 This is a plot of the NDVI Index on January 1st, 2000. NDVI, or Normalized Difference Vegetation Index, is a metric used to measure the health and density of plant life and other greenery, where the higher the number is, the better the vegetation.
 
@@ -119,3 +121,31 @@ ggplot(data = Full_data_avg, aes(x = date, y = avg_pm25, color = avg_pm25)) + ge
 ```
 
 The vertical line in each graph represents the date that the LYNX Blue Line opened, December of 2007. As seen in the NDVI graph, the NDVI was seemingly unaffected by the opening of the lightrail. However, with the pollution data, it shows a downwards trend in PM2.5 pollution, and since the NDVI index shows little change over time, this may indicate that the lightrail opening had some positive impact on air pollution. However, this downward trend was also observed before the opening, so it's probably not the only factor.
+
+## Preliminary Regression Results
+
+Below is code for some preliminary regression analysis using the cities of Asheville, Cincinnati, Columbia, and Greensboro as control cities, as they had similar trends of PM2.5 air pollution as Charlotte prior to the opening of the Lynx Blue Line. This final dataframe was created in a similar way to the original for Charlotte, gathering the PM2.5 data over the same intervals and adding other data such as weather information and creating a categorical variable to represent each city. All of this data was collected and put together by our stream's PRMs to create the final dataframe we used.
+
+```{r}
+# Regression Analysis
+Controls_data<-read.csv("charlotte_controls.csv")
+
+Controls_data2<-Controls_data %>%
+  mutate(Charlotte=ifelse(Name == "Charlotte", 1, 0)) %>%
+  mutate(Open=ifelse(year>=2008,1,0))
+
+summary(c1<-lm(pm25 ~ Charlotte + Open + Charlotte:Open, data = Controls_data2))
+
+# 2nd Regression with city controls, weather controls, and nonlinear weather controls
+install.packages("lfe")
+library("lfe")
+
+Controls_data3<- Controls_data2 %>%
+  mutate(Weather = AWND*PRCP*TAVG)
+
+CategoricalModel<- felm(pm25 ~ AWND + TAVG + PRCP + Charlotte + Open + Charlotte:Open + city_num + Weather, data = Controls_data3)
+
+summary(CategoricalModel)
+```
+
+The results from our preliminary dataframe are further supported through the regression results. The first regression, which only uses the light rail open and Charlotte variables, only gives a coefficient of -0.34 for the Charlotte:Open variable, which is what we're interested in. This is not significantly different from 0, so this regression shows that there's very little or no correlation between the light rail opening and the level of PM2.5 pollution. Adding in our control cities, weather controls, and non-linear weather controls to our regression, the coefficient for Charlotte:Open goes down to -0.31, which is even lower and again seems to support the idea that the opening of the Lynx Blue Line has little to no correlation with the level of PM2.5 air pollution in the immediate area. From the first graph through, it's clear that there's been a downward trend in PM2.5 air pollution over the years, so there's likely other factors that could be causing this.
